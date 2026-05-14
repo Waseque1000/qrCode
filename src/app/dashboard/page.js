@@ -75,7 +75,9 @@ export default function Dashboard() {
   };
 
   const filteredScans = scans.filter(scan => {
-    const matchesSearch = scan.data.toLowerCase().includes(searchTerm.toLowerCase());
+    const data = scan?.data || "";
+    const search = searchTerm || "";
+    const matchesSearch = data.toLowerCase().includes(search.toLowerCase());
     const matchesFilter = filterType === "all" || scan.type === filterType;
     return matchesSearch && matchesFilter;
   });
