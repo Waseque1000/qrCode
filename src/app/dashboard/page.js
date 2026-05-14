@@ -21,7 +21,7 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [isClient, setIsClient] = useState(false);
-  const { isConnected, on, emit } = useSocket();
+  const { isConnected, on, emit } = useSocket(sessionId, true);
   const [connectedDevices, setConnectedDevices] = useState(0);
 
   useEffect(() => {

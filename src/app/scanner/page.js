@@ -17,7 +17,7 @@ function ScannerContent() {
   const [flashOn, setFlashOn] = useState(false);
   const scannerRef = useRef(null);
   const html5QrCode = useRef(null);
-  const { isConnected, emit, on } = useSocket();
+  const { isConnected, emit, on } = useSocket(sessionId, false);
 
   useEffect(() => {
     if (isConnected && sessionId) {
