@@ -1,26 +1,105 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
+  --primary: #000000;
+  --primary-foreground: #ffffff;
+  --secondary: #666666;
+  --secondary-foreground: #ffffff;
+  --muted: #f9f9f9;
+  --muted-foreground: #666666;
+  --accent: #000000;
+  --accent-foreground: #ffffff;
+  --destructive: #ff0000;
+  --destructive-foreground: #ffffff;
+  --border: #eeeeee;
+  --input: #eeeeee;
+  --ring: #000000;
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    overflow-x: hidden;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .glass {
+    background: #ffffff;
+    border: 1px solid #eeeeee;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  }
+
+  .premium-card {
+    background: #ffffff;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+  }
+
+  .premium-card:hover {
+    border-color: #000000;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  .animated-gradient {
+    background: #ffffff;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+::-webkit-scrollbar-thumb {
+  background: #eeeeee;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #000000;
+}
+
+.scanner-frame {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  border: 1px solid #000000;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.scanner-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #000000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  animation: scan 2s linear infinite;
+}
+
+@keyframes scan {
+  0% { top: 0%; }
+  100% { top: 100%; }
 }
