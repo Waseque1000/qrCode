@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Html5Qrcode } from "html5-qrcode";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSocket } from "@/hooks/useSocket";
-import { FiCamera, FiZap, FiRefreshCw, FiArrowLeft, FiCheck } from "react-icons/fi";
+import { FiCamera, FiZap, FiRefreshCw, FiArrowLeft, FiCheck, FiInfo } from "react-icons/fi";
 import Link from "next/link";
 import { toast, Toaster } from "sonner";
 
@@ -15,7 +15,6 @@ function ScannerContent() {
   const [isScanning, setIsScanning] = useState(false);
   const [scannedData, setScannedData] = useState(null);
   const [flashOn, setFlashOn] = useState(false);
-  const scannerRef = useRef(null);
   const html5QrCode = useRef(null);
   const { isConnected, emit, on } = useSocket(sessionId, false);
 
@@ -41,8 +40,8 @@ function ScannerContent() {
       html5QrCode.current = new Html5Qrcode("reader");
       
       const config = { 
-        fps: 10, 
-        qrbox: { width: 250, height: 250 },
+        fps: 20, 
+        qrbox: { width: 280, height: 280 },
         aspectRatio: 1.0
       };
 
@@ -73,7 +72,7 @@ function ScannerContent() {
     setScannedData(data);
     
     if (window.navigator.vibrate) {
-      window.navigator.vibrate(200);
+      window.navigator.vibrate([100, 50, 100]);
     }
 
     let type = "text";
@@ -83,13 +82,15 @@ function ScannerContent() {
 
     emit("scan-data", { sessionId, data, type });
     
-    toast.success("DATA SYNCED");
+    toast.success("SYNCED", {
+      className: "bg-emerald-600 text-white rounded-2xl",
+    });
 
     stopScanner();
     setTimeout(() => {
       setScannedData(null);
       startScanner();
-    }, 2000);
+    }, 2500);
   };
 
   const toggleFlash = () => {
@@ -111,56 +112,62 @@ function ScannerContent() {
 
   if (!sessionId) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-12 text-center bg-white text-black">
-        <h1 className="text-3xl font-black mb-4 uppercase">No Session</h1>
-        <p className="text-xs font-bold text-gray-400 mb-10 uppercase tracking-widest leading-relaxed">
-          The pairing protocol has not been initialized. Please scan the dashboard QR code.
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-12 text-center">
+        <div className="w-20 h-20 bg-red-100 text-red-600 rounded-3xl flex items-center justify-center mb-8">
+           <FiInfo className="w-10 h-10" />
+        </div>
+        <h1 className="text-3xl font-black mb-4 tracking-tighter">PAIRING REQUIRED</h1>
+        <p className="text-slate-500 font-medium mb-12 max-w-sm leading-relaxed">
+          The pairing protocol has not been initialized. Please scan the dashboard QR code to establish a link.
         </p>
-        <Link href="/" className="px-10 py-5 bg-black text-white font-black uppercase text-xs tracking-widest">
-          Go Home
+        <Link href="/" className="px-10 py-5 bg-slate-900 text-white font-bold rounded-2xl hover:bg-indigo-600 transition-all active:scale-95 shadow-xl">
+          RETURN TO BASE
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col overflow-hidden font-sans">
-      <Toaster position="top-center" />
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col overflow-hidden font-sans">
+      <Toaster position="bottom-center" />
       
+      {/* Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+
       {/* Header */}
-      <div className="p-8 flex justify-between items-center border-b-2 border-black">
-        <Link href="/" className="p-3 border-2 border-black">
-          <FiArrowLeft className="w-5 h-5" />
+      <div className="p-8 flex justify-between items-center z-10">
+        <Link href="/" className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl hover:bg-white/20 transition-all">
+          <FiArrowLeft className="w-5 h-5 text-white" />
         </Link>
         <div className="text-center">
-          <div className="text-[10px] font-black uppercase tracking-[0.3em] mb-1">Session</div>
-          <div className="text-xs font-mono font-bold text-gray-400">{sessionId}</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 mb-1">Live Tunnel</div>
+          <div className="text-xs font-mono font-bold text-indigo-400">{sessionId}</div>
         </div>
         <button 
           onClick={toggleFlash}
-          className={`p-3 border-2 border-black transition-all ${flashOn ? 'bg-black text-white' : 'bg-white text-black'}`}
+          className={`p-3 backdrop-blur-md border transition-all rounded-2xl ${flashOn ? 'bg-indigo-500 border-indigo-400 text-white' : 'bg-white/10 border-white/20 text-white'}`}
         >
           <FiZap />
         </button>
       </div>
 
       {/* Camera */}
-      <div className="flex-1 relative flex items-center justify-center p-10">
-        <div id="reader" className="w-full max-w-[400px] aspect-square border-4 border-black" />
+      <div className="flex-1 relative flex items-center justify-center p-6">
+        <div id="reader" className="w-full max-w-[450px] aspect-square rounded-[3rem] overflow-hidden bg-black/40 border border-white/10 shadow-2xl" />
         
         {/* Frame Overlay */}
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-          <div className="w-[280px] h-[280px] relative">
-            <div className="absolute top-0 left-0 w-12 h-12 border-t-8 border-l-8 border-black" />
-            <div className="absolute top-0 right-0 w-12 h-12 border-t-8 border-r-8 border-black" />
-            <div className="absolute bottom-0 left-0 w-12 h-12 border-b-8 border-l-8 border-black" />
-            <div className="absolute bottom-0 right-0 w-12 h-12 border-b-8 border-r-8 border-black" />
+          <div className="w-[300px] h-[300px] relative">
+            <div className="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-indigo-500 rounded-tl-3xl shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+            <div className="absolute top-0 right-0 w-16 h-16 border-t-4 border-r-4 border-indigo-500 rounded-tr-3xl shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+            <div className="absolute bottom-0 left-0 w-16 h-16 border-b-4 border-l-4 border-indigo-500 rounded-bl-3xl shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+            <div className="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-indigo-500 rounded-br-3xl shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
             
             {isScanning && (
               <motion.div 
-                className="absolute left-4 right-4 h-1 bg-black"
+                className="absolute left-4 right-4 h-1 bg-indigo-400 rounded-full blur-[2px] shadow-[0_0_10px_#6366f1]"
                 animate={{ top: ['10%', '90%', '10%'] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
               />
             )}
           </div>
@@ -170,15 +177,23 @@ function ScannerContent() {
         <AnimatePresence>
           {scannedData && (
             <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-20 flex items-center justify-center bg-white/95 p-12"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="absolute inset-0 z-20 flex items-center justify-center bg-indigo-600 p-12"
             >
               <div className="text-center">
-                <FiCheck className="text-5xl mb-6 mx-auto" />
-                <h3 className="text-2xl font-black uppercase tracking-tighter mb-2">SYNCED</h3>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate w-48 mx-auto">{scannedData}</p>
+                <motion.div 
+                  initial={{ rotate: -10, scale: 0.8 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-8 backdrop-blur-xl"
+                >
+                  <FiCheck className="text-white text-5xl" />
+                </motion.div>
+                <h3 className="text-4xl font-black uppercase tracking-tighter mb-4">SYNCED</h3>
+                <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 max-w-xs mx-auto">
+                  <p className="text-xs font-bold text-white/80 uppercase tracking-widest break-all line-clamp-2">{scannedData}</p>
+                </div>
               </div>
             </motion.div>
           )}
@@ -187,23 +202,24 @@ function ScannerContent() {
         {!isScanning && (
           <button 
             onClick={startScanner}
-            className="absolute z-10 px-12 py-6 bg-black text-white font-black uppercase tracking-[0.2em] text-xs"
+            className="absolute z-10 px-12 py-6 bg-indigo-600 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl shadow-2xl shadow-indigo-500/50 hover:bg-indigo-700 transition-all active:scale-95 flex items-center gap-3"
           >
-            Open Camera
+            <FiCamera className="text-lg" />
+            INITIALIZE OPTICS
           </button>
         )}
       </div>
 
       {/* Footer */}
-      <div className="p-10 text-center border-t-2 border-black">
+      <div className="p-10 text-center z-10">
         <div className="flex justify-center gap-10">
           <div className="flex items-center gap-3">
-            <div className={`w-2 h-2 ${isConnected ? 'bg-black animate-pulse' : 'bg-gray-200'}`} />
-            <span className="text-[10px] font-black uppercase tracking-widest">{isConnected ? "ONLINE" : "OFFLINE"}</span>
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 shadow-[0_0_10px_#10b981] animate-pulse' : 'bg-red-500'}`} />
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/60">{isConnected ? "TUNNEL_ONLINE" : "SIGNAL_LOST"}</span>
           </div>
-          <div className="flex items-center gap-3 text-gray-300">
-            <FiRefreshCw className="w-3 h-3" />
-            <span className="text-[10px] font-black uppercase tracking-widest">REALTIME</span>
+          <div className="flex items-center gap-3 text-indigo-400">
+            <FiRefreshCw className="w-3 h-3 animate-spin-slow" />
+            <span className="text-[10px] font-black uppercase tracking-widest">LIVE_BRIDGE</span>
           </div>
         </div>
       </div>
@@ -213,7 +229,7 @@ function ScannerContent() {
 
 export default function Scanner() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center text-black font-black uppercase tracking-widest">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-white font-black uppercase tracking-[0.3em] animate-pulse">Establishing Signal...</div>}>
       <ScannerContent />
     </Suspense>
   );
